@@ -17,6 +17,18 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         // Do any additional setup after loading the view.
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addNewPerson))
         
+//Step 4:  Loading the array back from disk when the app starts
+        let defaults = UserDefaults.standard
+
+        if let savedPeople = defaults.object(forKey: "people") as? Data {
+            let jsonDecoder = JSONDecoder()
+
+            do {
+                people = try jsonDecoder.decode([Person].self, from: savedPeople)
+            } catch {
+                print("Failed to load people")
+            }
+        }
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -61,8 +73,8 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         //next 3 lines are added after creating "people" property
         let person = Person(name: "Unkown", image: imageName)
         people.append(person)
+        save() // Saving Photos with Codable - 3b step:  Callling save( ) method where needed
         collectionView.reloadData()
-        
         dismiss(animated: true)
     }
     
@@ -83,13 +95,21 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         ac.addAction(UIAlertAction(title: "OK", style: .default) { [weak self, weak ac] _ in
             guard let newName = ac?.textFields?[0].text else { return }
             person.name = newName
-
+            self?.save() // Saving Photos with Codable - 3a step:  Callling save( ) method where needed
             self?.collectionView.reloadData()
         })
 
         present(ac, animated: true)
     }
-    
-    
+// Saving Photos with Codable - 2 step: Creating a function to encode(write) data.
+    func save() {
+        let jsonEncoder = JSONEncoder()
+        if let savedData = try? jsonEncoder.encode(people) {
+            let defaults = UserDefaults.standard
+            defaults.set(savedData, forKey: "people")
+        } else {
+            print("Failed to save people.")
+        }
+    }
 }
 

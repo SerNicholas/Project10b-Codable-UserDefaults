@@ -7,8 +7,8 @@
 //
 
 import UIKit
-
-class Person: NSObject {
+//Saving photos using Codable - 1 step: Conforming to Codable
+class Person: NSObject, Codable {
     var name: String
     var image: String
     
